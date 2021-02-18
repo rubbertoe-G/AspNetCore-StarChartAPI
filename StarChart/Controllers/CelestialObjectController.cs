@@ -39,7 +39,7 @@ namespace StarChart.Controllers
             return Ok(celestialObject);
         }
 
-        [HttpGet("{name:string}")]
+        [HttpGet("{name}")]
         public IActionResult GetByName(string name)
         {
             var celestialObjects = _context.CelestialObjects.Where(e => e.Name == name).ToList();
@@ -53,7 +53,7 @@ namespace StarChart.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll(string name)
+        public IActionResult GetAll()
         {
             var celestialObjects = _context.CelestialObjects.ToList();
             if (!celestialObjects.Any()) return NotFound("Unable to retrieve celestial object");
