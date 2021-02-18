@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using StarChart.Data;
+using StarChart.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -27,10 +28,24 @@ namespace StarChart.Controllers
         }
 
         // GET api/<CelestialObjectController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpGet("{id:int}", Name = "GetById")]
+        public IActionResult GetById(int id)
         {
-            return "value";
+            var foundObject = _context.Find<CelestialObject>(id);
+            if(foundObject == null) return NotFound("Unable to retrieve celestial object");
+
+            var objs = _context.Query<CelestialObject>().ToList();
+            foreach(var o in objs)
+            {
+                if(id == o.OrbitedObjectId)
+                {
+                    o.Satellites.Add(foundObject);
+                }
+            }
+
+            _context.SaveChanges();
+            
+            return Ok(foundObject);
         }
 
         // POST api/<CelestialObjectController>
