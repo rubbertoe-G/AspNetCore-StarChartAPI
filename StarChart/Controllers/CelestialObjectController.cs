@@ -31,39 +31,41 @@ namespace StarChart.Controllers
         [HttpGet("{id:int}", Name = "GetById")]
         public IActionResult GetById(int id)
         {
-            var foundObject = _context.Find<CelestialObject>(id);
-            if(foundObject == null) return NotFound("Unable to retrieve celestial object");
+            var celestialObject = _context.CelestialObjects.Find(id);
+            if(celestialObject == null) return NotFound();
 
-            var objs = _context.Query<CelestialObject>().ToList();
-            foreach(var o in objs)
+            celestialObject.Satellites = _context.CelestialObjects.Where(o => o.OrbitedObjectId == id).ToList();
+
+            return Ok(celestialObject);
+        }
+
+        [HttpGet("{name:string}")]
+        public IActionResult GetByName(string name)
+        {
+            var celestialObjects = _context.CelestialObjects.Where(e => e.Name == name).ToList();
+            if(!celestialObjects.Any()) return NotFound("Unable to retrieve celestial object");
+
+            foreach (var obj in celestialObjects)
             {
-                if(id == o.OrbitedObjectId)
-                {
-                    o.Satellites.Add(foundObject);
-                }
+                obj.Satellites = _context.CelestialObjects.Where(o => o.OrbitedObjectId == obj.Id).ToList();
+            }
+            return Ok(celestialObjects);
+        }
+
+        [HttpGet]
+        public IActionResult GetAll(string name)
+        {
+            var celestialObjects = _context.CelestialObjects.ToList();
+            if (!celestialObjects.Any()) return NotFound("Unable to retrieve celestial object");
+
+            foreach (var obj in celestialObjects)
+            {
+                obj.Satellites = _context.CelestialObjects.Where(o => o.OrbitedObjectId == obj.Id).ToList();
             }
 
-            _context.SaveChanges();
-            
-            return Ok(foundObject);
+            return Ok(celestialObjects);
         }
 
-        // POST api/<CelestialObjectController>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
 
-        // PUT api/<CelestialObjectController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<CelestialObjectController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
     }
 }
